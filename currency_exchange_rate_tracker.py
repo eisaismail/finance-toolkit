@@ -9,8 +9,15 @@ from datetime import datetime, timedelta
 BASE_URL = "https://api.frankfurter.app"
 
 
+def _validate_currency(code):
+    if not isinstance(code, str) or len(code.strip()) != 3 or not code.strip().isalpha():
+        raise ValueError("Currency codes must be three letters, e.g. EUR or USD.")
+    return code.strip().upper()
+
+
 # Get the latest exchange rate
 def get_latest_rate(base="EUR", target="USD"):
+    base, target = _validate_currency(base), _validate_currency(target)
     url = f"{BASE_URL}/latest?from={base}&to={target}"
     response = requests.get(url, timeout=10)
 
@@ -29,6 +36,9 @@ def get_latest_rate(base="EUR", target="USD"):
 
 # Get exchange rates for a number of previous days
 def get_history(base="EUR", target="USD", days=90):
+    base, target = _validate_currency(base), _validate_currency(target)
+    if isinstance(days, bool) or not isinstance(days, int) or days < 1:
+        raise ValueError("days must be a positive whole number")
     end_date = datetime.today()
     start_date = end_date - timedelta(days=days)
 
@@ -56,6 +66,8 @@ def get_history(base="EUR", target="USD", days=90):
 
 # Calculate some basic statistics
 def get_statistics(df, base, target):
+    if df.empty or "Rate" not in df.columns:
+        raise ValueError("Cannot calculate statistics without rate observations.")
     rates = df["Rate"]
 
     return {
