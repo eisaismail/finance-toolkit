@@ -12,9 +12,19 @@ Libraries used:
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import pandas as pd
+import math
 
 
 # ── 1. CORE FORMULA ──────────────────────────────────────────────────────────
+
+def _validate_inputs(principal: float, annual_rate: float, years: int) -> None:
+    if not math.isfinite(principal) or principal <= 0:
+        raise ValueError("principal must be a positive, finite amount")
+    if not math.isfinite(annual_rate) or annual_rate < 0:
+        raise ValueError("annual_rate must be a non-negative, finite percentage")
+    if isinstance(years, bool) or not isinstance(years, int) or years < 1:
+        raise ValueError("years must be a positive whole number")
+
 
 def monthly_payment(principal: float, annual_rate: float, years: int) -> float:
     """
@@ -28,6 +38,7 @@ def monthly_payment(principal: float, annual_rate: float, years: int) -> float:
         r = monthly interest rate (annual rate / 12)
         n = total number of monthly payments (years * 12)
     """
+    _validate_inputs(principal, annual_rate, years)
     r = annual_rate / 100 / 12   # convert annual % to monthly decimal
     n = years * 12               # total number of payments
 
@@ -47,6 +58,7 @@ def amortization_schedule(principal: float, annual_rate: float, years: int) -> p
     - How much goes to reducing the principal (balance owed)
     - The remaining balance after each payment
     """
+    _validate_inputs(principal, annual_rate, years)
     r = annual_rate / 100 / 12
     n = years * 12
     M = monthly_payment(principal, annual_rate, years)
@@ -170,6 +182,9 @@ def read_number(prompt: str, cast=float, minimum: float = 0):
             value = cast(input(prompt))
         except ValueError:
             print("  Please enter a number.")
+            continue
+        if isinstance(value, float) and not math.isfinite(value):
+            print("  Please enter a finite number.")
             continue
         if value < minimum:
             print(f"  Must be at least {minimum}.")
