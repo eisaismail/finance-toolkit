@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import pandas as pd
 import re
+import math
 
 
 # ── 1. CORE FORMULA ──────────────────────────────────────────────────────────
@@ -46,6 +47,17 @@ def compound_growth(
     Returns:
         DataFrame with year-by-year breakdown
     """
+    if not math.isfinite(principal) or principal < 0:
+        raise ValueError("principal must be a non-negative, finite amount")
+    if not math.isfinite(annual_rate) or annual_rate < 0:
+        raise ValueError("annual_rate must be a non-negative, finite percentage")
+    if not math.isfinite(monthly_contribution) or monthly_contribution < 0:
+        raise ValueError("monthly_contribution must be a non-negative, finite amount")
+    if isinstance(years, bool) or not isinstance(years, int) or years < 1:
+        raise ValueError("years must be a positive whole number")
+    if isinstance(compounds_per_year, bool) or not isinstance(compounds_per_year, int) or compounds_per_year < 1:
+        raise ValueError("compounds_per_year must be a positive whole number")
+
     r = (1+ annual_rate / 100 / compounds_per_year) ** (compounds_per_year / 12) - 1   # rate per compounding period
     records = []
 
